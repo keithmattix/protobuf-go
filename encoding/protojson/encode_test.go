@@ -1122,6 +1122,11 @@ func TestMarshal(t *testing.T) {
 		input: &wrapperspb.Int64Value{Value: 42},
 		want:  `"42"`,
 	}, {
+		desc:  "Int64Value with EmitInt64Unquoted",
+		mo:    protojson.MarshalOptions{EmitInt64Unquoted: true},
+		input: &wrapperspb.Int64Value{Value: 42},
+		want:  `42`,
+	}, {
 		desc:  "UInt32Value",
 		input: &wrapperspb.UInt32Value{Value: 42},
 		want:  `42`,
@@ -1129,6 +1134,11 @@ func TestMarshal(t *testing.T) {
 		desc:  "UInt64Value",
 		input: &wrapperspb.UInt64Value{Value: 42},
 		want:  `"42"`,
+	}, {
+		desc:  "UInt64Value with EmitInt64Unquoted",
+		mo:    protojson.MarshalOptions{EmitInt64Unquoted: true},
+		input: &wrapperspb.UInt64Value{Value: 42},
+		want:  `42`,
 	}, {
 		desc:  "FloatValue",
 		input: &wrapperspb.FloatValue{Value: 1.02},
