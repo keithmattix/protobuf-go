@@ -82,6 +82,12 @@ type MarshalOptions struct {
 	//  ╚═══════╧════════════════════════════╝
 	EmitUnpopulated bool
 
+	// EmitInt64Unquoted specifies whether to emit u/int64 data values as quoted strings.
+	// While it is generally considered safer to store 64-bit integer values as JSON strings
+	// due to Javascript not supporting integers greater than 2^53 - 1, this option enables
+	// marshalers to decide how they want to handle the situation on an individual basis
+	EmitInt64Unquoted bool
+
 	// Resolver is used for looking up types when expanding google.protobuf.Any
 	// messages. If nil, this defaults to using protoregistry.GlobalTypes.
 	Resolver interface {
@@ -272,10 +278,21 @@ func (e encoder) marshalSingular(val pref.Value, fd pref.FieldDescriptor) error 
 	case pref.Uint32Kind, pref.Fixed32Kind:
 		e.WriteUint(val.Uint())
 
-	case pref.Int64Kind, pref.Sint64Kind, pref.Uint64Kind,
-		pref.Sfixed64Kind, pref.Fixed64Kind:
-		// 64-bit integers are written out as JSON string.
-		e.WriteString(val.String())
+	case pref.Uint64Kind, pref.Fixed64Kind:
+		if e.opts.EmitInt64Unquoted {
+			e.WriteUint(val.Uint())
+		} else {
+			// 64-bit integers are written out as JSON string.
+			e.WriteString(val.String())
+		}
+
+	case pref.Int64Kind, pref.Sint64Kind, pref.Sfixed64Kind:
+		if e.opts.EmitInt64Unquoted {
+			e.WriteInt(val.Int())
+		} else {
+			// 64-bit integers are written out as JSON string.
+			e.WriteString(val.String())
+		}
 
 	case pref.FloatKind:
 		// Encoder.WriteFloat handles the special numbers NaN and infinites.
